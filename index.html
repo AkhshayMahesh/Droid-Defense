@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Droid Defense</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @font-face {
+            font-family: other;
+            src: url(Argue\ DEMO.otf);
+        }
+        @font-face {
+            font-family: title;
+            src: url(Brightness.ttf);
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-parent">
+        <canvas id="outer"></canvas>    
+        <canvas id="inner"></canvas>
+    </div>
+    <dialog class="over" id="over">
+        Game Over!! <br>
+        <p id="sc">You scored </p>
+        <div style="display: flex;justify-content: center;"><button class="playagain" onclick="initGame()">Play Again</button></div>
+    </dialog>
+    <script src="script.js"></script>
+</body>
+</html>
