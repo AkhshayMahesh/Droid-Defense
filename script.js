@@ -487,8 +487,8 @@ function initGame() {
         mouse = { x: 0, y: 0 }
 
         rank = JSON.parse(localStorage.getItem("rank"))
-        best = rank[0].Score
-        if (rank == null) {
+        if(rank != null) best = rank[0].Score
+        else if(rank == null) {
             localStorage.setItem("rank", JSON.stringify([]))
             rank = []
             best = 0
