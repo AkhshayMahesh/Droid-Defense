@@ -1,4 +1,4 @@
-let myreq, s, p, b, SLife, BLife, hits, grids, temp, hitb, bots, f, f1, f2, f3, t, time, mouse, B, Bb, u, score, best
+let myreq, s, p, b, SLife, BLife, hits, grids, temp, hitb, bots, f, f1, f2, f3, f4, t, time, mouse, B, Bb, u, score, best, paused, gname, rank, h
 
 let inner = document.getElementById("inner")
 let c = inner.getContext("2d")
@@ -23,7 +23,8 @@ window.onresize = () => {
 }
 
 window.onload = () => {
-    initGame()
+    document.getElementById("over").close()
+    document.getElementById("intro").showModal()
 }
 
 class Shooter {
@@ -159,7 +160,6 @@ class StaticBot {
         this.position.y += velocity.y
         this.draw()
     }
-
 }
 
 class ShootBot {
@@ -173,7 +173,7 @@ class ShootBot {
         if ((this.position.x - b.position.x) >= 0) {
             this.direction += Math.PI
         }
-        this.count = 1
+        this.count = 0
     }
 
     draw() {
@@ -188,10 +188,10 @@ class ShootBot {
     }
 
     update() {
-        this.count++
         if (this.count % 447 == 0) {
             hitb.push(new EBullet({ position: this.position }))
         }
+        this.count++
         this.direction = Math.atan((this.position.y - b.position.y) / (this.position.x - b.position.x))
         if ((this.position.x - b.position.x) >= 0) {
             this.direction += Math.PI
@@ -288,7 +288,7 @@ class SBullet {
     }
 
     update() {
-        if (circleDistance(this.position.x, this.position.y, b.position.x, b.position.y) <= this.radius + b.radius) {
+        if (isCollide1(this, b) && !isCollide1(p, b)) {
             if ((mouse.x - s.position.x) <= 0) this.direction -= Math.PI / 2
             else this.direction += Math.PI / 2
         }
@@ -395,6 +395,34 @@ class BossBot {
     }
 }
 
+class Homing {
+    constructor({ position }) {
+        this.size = 20
+        this.position = { ...position }
+        this.direction = Math.atan((this.position.y - s.position.y) / (this.position.x - s.position.x))
+        if ((this.position.x - s.position.x) >= 0) this.direction += Math.PI
+        this.velocity = 2
+    }
+
+    draw() {
+        c.beginPath()
+        c.fillStyle = "orange"
+        c.shadowOffsetX = 0;
+        c.shadowOffsetY = 0;
+        c.shadowBlur = 20;
+        c.shadowColor = 'red'
+        c.fillRect(this.position.x, this.position.y, this.size, this.size)
+    }
+
+    update() {
+        this.direction = Math.atan((this.position.y - s.position.y) / (this.position.x - s.position.x))
+        if ((this.position.x - s.position.x) >= 0) this.direction += Math.PI
+        this.position.x += this.velocity * Math.cos(this.direction)
+        this.position.y += this.velocity * Math.sin(this.direction)
+        this.draw()
+    }
+}
+
 class Powerups {
     constructor() {
         this.position = {
@@ -415,7 +443,7 @@ class Powerups {
     }
 
     update() {
-        if (this.radius < 3 || this.radius > 7) {
+        if (this.radius < 3 || this.radius > 9) {
             this.rvelocity = -this.rvelocity
         }
         this.radius += this.rvelocity
@@ -429,35 +457,48 @@ function randRange(x, y) {
     return Math.floor(Math.random() * (max - min) + min)
 }
 
-function circleDistance(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))
+function isCollide1(circle1, circle2) {
+    return (Math.sqrt(Math.pow(circle1.position.x - circle2.position.x, 2) + Math.pow(circle1.position.y - circle2.position.y, 2)) < circle1.radius + circle2.radius)
+}
+
+function isCollide2(circle, rect) {
+    return (circle.position.x > (rect.position.x - circle.radius) && circle.position.x < (rect.position.x + rect.size + circle.radius) && circle.position.y > (rect.position.y - circle.radius) && circle.position.y < rect.position.y + rect.size + circle.radius)
 }
 
 function initGame() {
-    document.getElementById("over").close()
-    c.fillStyle = 'rgba(0,0,0,0.65)'
-    c.fillRect(0, 0, innerWidth, innerHeight)
+    gname = document.getElementById("name").value
+    if (gname != "") {
+        document.getElementById("intro").close()
+        c.fillStyle = 'rgba(0,0,0,0.65)'
+        c.fillRect(0, 0, innerWidth, innerHeight)
+        s = new Shooter()
+        s.draw()
+        p = new Pointer()
+        p.draw()
+        b = new Base()
+        b.draw()
+        grids = []
+        hits = []
+        hitb = []
+        bots = []
+        f = f4 = t = score = paused = 0
+        SLife = BLife = 10
+        f2 = f3 = f1 = 1
+        mouse = { x: 0, y: 0 }
 
-    s = new Shooter()
-    s.draw()
-    p = new Pointer()
-    p.draw()
-    b = new Base()
-    b.draw()
-    grids = []
-    hits = []
-    hitb = []
-    bots = []
-    f = f1 = t = score = 0
-    SLife = BLife = 10
-    f2 = f3 = 1
-    mouse = { x: 0, y: 0 }
+        rank = JSON.parse(localStorage.getItem("rank"))
+        best = rank[0].Score
+        if (rank == null) {
+            localStorage.setItem("rank", JSON.stringify([]))
+            rank = []
+            best = 0
+        }
 
-    best= localStorage.getItem("high")
-    if(best == null){
-        localStorage.setItem("high",0)
+        myreq = requestAnimationFrame(animate)
     }
-    myreq = requestAnimationFrame(animate)
+    else if (gname == "") {
+        document.getElementById("name").classList.add("error")
+    }
 }
 
 function animate() {
@@ -493,18 +534,19 @@ function game() {
     c1.fillStyle = "#BD00FF"
     c1.fill()
 
+    b.update()
     s.update()
     p.update()
-    b.update()
 
+    if (h) h.update()
     if (Bb) Bb.update()
     if (B) B.update()
     if (u) u.update()
 
     hits.forEach((bullet, i) => {
         bullet.update()
-        if (B && circleDistance(bullet.position.x, bullet.position.y, B.position.x, B.position.y) < bullet.radius + B.radius) {
-            score+=5
+        if (B && isCollide1(bullet, B)) {
+            score += 5
             if (B.life > 0) {
                 B.life--
             } else {
@@ -512,9 +554,14 @@ function game() {
             }
             hits.splice(i, 1)
         }
-        if (Bb && circleDistance(bullet.position.x, bullet.position.y, Bb.position.x, Bb.position.y) < bullet.radius + Bb.radius) {
-            score+=3
+        else if (Bb && isCollide1(bullet, Bb)) {
+            score += 3
             Bb = ""
+            hits.splice(i, 1)
+        }
+        else if (h && isCollide2(bullet, h)) {
+            score += 3
+            h = ""
             hits.splice(i, 1)
         }
     })
@@ -527,7 +574,7 @@ function game() {
 
         grid.StaticBots.forEach((staticBot, i) => {
             staticBot.update({ velocity: grid.speed })
-            if (circleDistance(staticBot.position.x, staticBot.position.y, b.position.x, b.position.y) < staticBot.size + b.radius) {
+            if (isCollide2(b, staticBot)) {
                 if (b.flag) {
                     b.elife--
                 } else {
@@ -535,7 +582,7 @@ function game() {
                 }
                 grid.StaticBots.splice(i, 1)
             }
-            if (circleDistance(staticBot.position.x, staticBot.position.y, s.position.x, s.position.y) < staticBot.size + s.radius) {
+            if (isCollide2(s, staticBot)) {
                 SLife--
                 grid.StaticBots.splice(i, 1)
             }
@@ -549,11 +596,11 @@ function game() {
                 if (bullet.position.y - bullet.radius > inner.height || bullet.position.x + bullet.radius > inner.width || bullet.position.x - bullet.radius < 0 || bullet.position.y - bullet.radius < 0) {
                     hits.splice(j, 1)
                 }
-                if (bullet.position.x - bullet.radius < staticBot.position.x + staticBot.size && bullet.position.x + bullet.radius > staticBot.position.x && bullet.position.y - bullet.radius < staticBot.position.y + staticBot.size && bullet.position.y + bullet.radius > staticBot.position.y) {
+                if (isCollide2(bullet, staticBot)) {
                     setTimeout(() => {
                         grid.StaticBots.splice(i, 1)
                         hits.splice(j, 1)
-                        score+=2
+                        score += 2
                     }, 0)
                 }
             })
@@ -561,10 +608,10 @@ function game() {
     })
 
     hitb.forEach((ebullet, j) => {
-        if (circleDistance(ebullet.position.x, ebullet.position.y, s.position.x, s.position.y) < ebullet.radius + s.radius) {
+        if (isCollide1(ebullet, s)) {
             SLife--
             hitb.splice(j, 1)
-        } else if (circleDistance(ebullet.position.x, ebullet.position.y, b.position.x, b.position.y) < ebullet.radius + b.radius) {
+        } else if (isCollide1(ebullet, b)) {
             if (b.flag) {
                 b.elife--
             } else {
@@ -573,10 +620,10 @@ function game() {
             hitb.splice(j, 1)
         }
         for (let k = 0; k < hits.length; k++) {
-            if (circleDistance(ebullet.position.x, ebullet.position.y, hits[k].position.x, hits[k].position.y) < ebullet.radius + hits[k].radius) {
+            if (isCollide1(ebullet, hits[k])) {
                 hitb.splice(j, 1)
                 hits.splice(k, 1)
-                score+=1
+                score += 1
             }
         }
         ebullet.update()
@@ -584,22 +631,21 @@ function game() {
 
     bots.forEach((bot, i) => {
         hits.forEach((bullet, k) => {
-            if (circleDistance(bullet.position.x, bullet.position.y, bot.position.x, bot.position.y) < bot.radius + bullet.radius) {
+            if (isCollide1(bullet, bot)) {
                 bots.splice(i, 1)
                 hits.splice(k, 1)
-                score+=3
+                score += 3
             }
         })
         bot.update()
     })
 
-    if (u && circleDistance(u.position.x, u.position.y, s.position.x, s.position.y) < s.radius + u.radius) {
-        console.log("Yeah got")
+    if (u && isCollide1(u, s)) {
         u = ""
         b.flag = true
     }
 
-    if (Bb && circleDistance(b.position.x, b.position.y, Bb.position.x, Bb.position.y) < Bb.radius + b.radius) {
+    if (Bb && isCollide1(Bb, b)) {
         if (b.flag) {
             b.elife--
         } else {
@@ -607,9 +653,22 @@ function game() {
         }
         Bb = ""
     }
-    if (Bb && circleDistance(s.position.x, s.position.y, Bb.position.x, Bb.position.y) < Bb.radius + s.radius) {
+    if (Bb && isCollide1(s, Bb)) {
         SLife--
         Bb = ""
+    }
+
+    if (h && isCollide2(b, h)) {
+        if (b.flag) {
+            b.elife--
+        } else {
+            BLife--
+        }
+        h = ""
+    }
+    if (h && isCollide2(s, h)) {
+        SLife--
+        h = ""
     }
 
     if (!B && f2 % 1845 == 0) {
@@ -627,7 +686,7 @@ function game() {
         f = 1
     }
 
-    if (f1++ % 2000 == 0) {
+    if (score>15 && f1++ % 500 == 0) {
         bots.push(new ShootBot())
     }
 
@@ -639,15 +698,52 @@ function game() {
         Bb = new BBullet()
     }
 
-    if(score>best) {
-        localStorage.setItem("high",score)
-        best=score
+    if (score > best) {
+        best = score
+        localStorage.setItem("high", best)
     }
 
-    if(SLife==0 || BLife==0){
+    if (!h && B) {
+        f4++
+        if (f4 % 179 == 0) h = new Homing({ position: B.position })
+    }
+
+    if (SLife <= 0 || BLife <= 0) {
         cancelAnimationFrame(myreq)
-        document.getElementById("sc").innerHTML=`You scored ${score} points`
+        rank.push({
+            Name: gname,
+            Score: score
+        })
+        rank.sort(function (a, d) {
+            return d.Score - a.Score
+        })
+        var len = (rank.length < 3) ? rank.length : 3
+        for (let i = 0; i < len; i++) {
+            let panel = document.createElement("div")
+            if (i == 0) panel.innerHTML = `🥇 ${rank[i].Name} <div>${rank[i].Score}</div>`
+            else if (i == 1) panel.innerHTML = `🥈 ${rank[i].Name}  <div>${rank[i].Score}</div>`
+            else if (i == 2) panel.innerHTML = `🥉 ${rank[i].Name}  <div>${rank[i].Score}</div>`
+            document.getElementById("lb").appendChild(panel)
+        }
+        for (i = 3; i < rank.length; i++) rank.splice(i, 1)
+        localStorage.setItem("rank", JSON.stringify(rank))
         document.getElementById("over").showModal()
+    }
+}
+
+function pause(e) {
+    if (e.key == "Escape") {
+        if (paused == 0) {
+            cancelAnimationFrame(myreq)
+            paused = 1
+            c1.beginPath()
+            c1.fillStyle = "rgba(0,0,0,0.5)"
+            c1.fillRect(0, 0, outer.width, outer.height)
+        }
+        else if (paused == 1) {
+            myreq = requestAnimationFrame(animate)
+            paused = 0
+        }
     }
 }
 
@@ -668,8 +764,8 @@ function shooterStop(e) {
     s.speed.y = 0
 }
 
-
 inner.addEventListener("mousemove", mouseMove)
+window.addEventListener("keyup", pause)
 window.addEventListener("keydown", shooterMove)
 window.addEventListener("keyup", shooterStop)
 inner.addEventListener("mousedown", ({ buttons }) => {
