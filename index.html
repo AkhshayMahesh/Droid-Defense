@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,22 +12,45 @@
             font-family: other;
             src: url(Argue\ DEMO.otf);
         }
+
         @font-face {
             font-family: title;
             src: url(Brightness.ttf);
         }
     </style>
 </head>
+
 <body>
     <div id="canvas-parent">
-        <canvas id="outer"></canvas>    
+        <canvas id="outer"></canvas>
         <canvas id="inner"></canvas>
     </div>
+
     <dialog class="over" id="over">
-        Game Over!! <br>
-        <p id="sc">You scored </p>
-        <div style="display: flex;justify-content: center;"><button class="playagain" onclick="initGame()">Play Again</button></div>
+        Game Over!!<br><div style="font-size:3vmin;font-weight: 700;color: gray;text-align: center;width: 100%;">Leader Board</div>
+        <div class="lb" id="lb"></div>
+        <div style="display: flex;justify-content: center;"><button class="playagain" onclick="location.reload()">Play Again</button></div>
     </dialog>
+
+    <dialog class="intro" id="intro">
+        DROID DEFENSE
+        <div style="display: flex;justify-content: center;margin-top: 3vmin;font-size: large;">
+            <label for="name" style="margin-right: 2vmin;">Name</label>
+            <input type="text" class="name" id="name" placeholder="Name">
+        </div>
+        <p class="inst" id="inst">
+            <br>Use 'a' 'w' 's' 'd' to move the player<br>
+            Use mouse to aim at the enemies<br>
+            If any power ups appear, the player has to reach the spot to gain it<br>
+            Using the white coloured power up, the home can survive a maximum of 5 enemy attacks<br>
+            Press Escape to pause and resume the game<br>
+            Click 'Play' to start the game<br><br>
+        </p>
+        <div style="display: flex;justify-content: center;"><button class="playagain" onclick="initGame()">Play</button>
+        </div>
+    </dialog>
+    
     <script src="script.js"></script>
 </body>
+
 </html>
