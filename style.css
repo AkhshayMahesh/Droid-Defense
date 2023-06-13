@@ -1,7 +1,7 @@
 body {
     background-image: url("a\ background\ wh\ 1.png");
     background-size: cover;
-    position: relative;
+    position: absolute;
     margin: 0;
     padding: 0;
 }
@@ -16,6 +16,27 @@ body {
     position: absolute;
  }
 
+#intro {
+    position: relative;
+    flex-direction: column;
+    text-align: center;
+    padding: 6vmin;
+    border-radius: 2vmin;
+    font-family:title;
+    font-size: 8vmin;
+    border: none;
+}
+
+#intro>p, #intro>div, #lb{
+    font-size: medium;
+    text-align: center;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.error{
+    animation: err 0.5s infinite;
+}
+
  #over{
     border: none;
     border-radius: 5px;
@@ -25,12 +46,18 @@ body {
     animation: dialog 1s ;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
+    text-align: center;
+    width: 50vmin;
  }
 
  #over>p{
     text-align: center;
     font-size: 3vmin;
     font-weight: 600;
+ }
+
+ #over>div>button{
+    margin-top: 2vmin;
  }
 
  .playagain{
@@ -45,8 +72,28 @@ body {
     color: white;
 }
 
+.playagain:hover{
+    transform: scale(1.05);
+}
+
+#lb{
+    margin-top: 1vmin;
+}
+#lb>div{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1vmin;
+}
+
 @keyframes dialog{
     0%{transform: scale(0);}
     50%{transform: scale(1.4);}
     100%{transform: scale(1);}
+}
+
+@keyframes err {
+    0%{box-shadow: 0 0 1vmin 0.5vmin red;}
+    50%{box-shadow: 0 0 1vmin 0.15vmin red;}
+    100%{box-shadow: 0 0 1vmin 0.5vmin red;}
 }
